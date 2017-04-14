@@ -51,6 +51,16 @@ function Level:applyTransaction(transaction)
     end
 end
 
+function Level:undoTransaction(transaction)
+    for i, type in pairs(transaction.previous) do
+        self.layers[transaction.layer]:setTile(i, type)
+    end
+end
+
+function Level:getTile(layer, i)
+    return self.layers[layer]:getTile(i)
+end
+
 function Level:draw()
     for x = 1, self.width do
         for y = 1, self.height do

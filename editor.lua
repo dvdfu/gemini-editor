@@ -23,21 +23,28 @@ end
 function Editor:mousepressed(mx, my, button)
     self.transaction = {
         layer = 'solid',
-        tiles = {}
+        tiles = {},
+        previous = {}
     }
     self:mousemoved(mx, my)
 end
 
 function Editor:mousemoved(mx, my)
-    self.selectedTile = self:coordsToTile(mx, my)
+    local tile = self:coordsToTile(mx, my)
     if self.transaction then
-        self.transaction.tiles[self.selectedTile] = 1
+        self.transaction.previous[tile] = self.level:getTile('solid', tile)
+        self.transaction.tiles[tile] = 1
     end
+    self.selectedTile = tile
 end
 
 function Editor:mousereleased(mx, my, button)
     self:applyTransaction(self.transaction)
     self.transaction = nil
+end
+
+function Editor:keypressed(key)
+    self:undoTransaction()
 end
 
 function Editor:coordsToTile(x, y)
@@ -57,6 +64,12 @@ end
 function Editor:applyTransaction(transaction)
     table.insert(self.transactions, transaction)
     self.level:applyTransaction(transaction)
+end
+
+function Editor:undoTransaction()
+    local transaction = table.remove(self.transactions)
+    if not transaction then return end
+    self.level:undoTransaction(transaction)
 end
 
 function Editor:draw()
