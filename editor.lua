@@ -1,5 +1,6 @@
 local Class = require 'modules.middleclass.middleclass'
 local Level = require 'level'
+local Util = require 'util'
 
 local Editor = Class('Editor')
 
@@ -21,7 +22,7 @@ end
 
 function Editor:mousepressed(mx, my, button)
     self.transaction = {
-        layer = self.level.activeLayer,
+        layer = 'solid',
         tiles = {}
     }
     self:mousemoved(mx, my)
@@ -30,21 +31,20 @@ end
 function Editor:mousemoved(mx, my)
     self.selectedTile = self:coordsToTile(mx, my)
     if self.transaction then
-        print(self.selectedTile)
-        self.transaction.tiles[self.selectedTile] = true
+        self.transaction.tiles[self.selectedTile] = 1
     end
 end
 
 function Editor:mousereleased(mx, my, button)
-    table.insert(self.transactions, self.transaction)
+    self:applyTransaction(self.transaction)
     self.transaction = nil
 end
 
 function Editor:coordsToTile(x, y)
     local tx = math.floor(x / 16) + 1
     local ty = math.floor(y / 16) + 1
-    assert(tx > 0 and tx <= self.level.width)
-    assert(ty > 0 and ty <= self.level.height)
+    tx = Util.clamp(tx, 1, self.level.width)
+    ty = Util.clamp(ty, 1, self.level.height)
     return (ty - 1) * self.level.width + tx
 end
 
@@ -54,14 +54,15 @@ function Editor:tileToCoords(t)
     return x* 16, math.floor(y) * 16
 end
 
-function Editor:draw()
-    for x = 1, self.level.width do
-        for y = 1, self.level.height do
-            love.graphics.rectangle('line', (x - 1) * 16, (y - 1) * 16, 16, 16)
-        end
-    end
+function Editor:applyTransaction(transaction)
+    table.insert(self.transactions, transaction)
+    self.level:applyTransaction(transaction)
+end
 
-    local tile = self:coordsToTile(love.mouse.getPosition)
+function Editor:draw()
+    self.level:draw()
+
+    local tile = self:coordsToTile(love.mouse.getPosition())
     local tx, ty = self:tileToCoords(self.selectedTile)
     love.graphics.rectangle('fill', tx, ty, 16, 16)
 
