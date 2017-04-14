@@ -1,0 +1,6 @@
+[submodule "modules/suit"]
+	path = modules/suit
+	url = https://github.com/vrld/SUIT.git
+[submodule "modules/middleclass"]
+	path = modules/middleclass
+	url = https://github.com/kikito/middleclass.git
