@@ -57,20 +57,20 @@ function Level:undoTransaction(transaction)
     end
 end
 
+function Level:getLayer(layer)
+    return self.layers[layer]
+end
+
 function Level:getTile(layer, i)
     return self.layers[layer]:getTile(i)
 end
 
-function Level:draw()
-    for x = 1, self.width do
-        for y = 1, self.height do
-            love.graphics.rectangle('line', (x - 1) * 16, (y - 1) * 16, 16, 16)
+function Level:getWidth()
+    return self.width
+end
 
-            if self.layers.solid:getTile((y - 1) * self.width + x) > 0 then
-                love.graphics.rectangle('fill', (x - 1) * 16, (y - 1) * 16, 16, 16)
-            end
-        end
-    end
+function Level:getHeight()
+    return self.height
 end
 
 return Level
